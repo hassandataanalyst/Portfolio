@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#05060E">
+
+    <title>404 — Page Not Found | Muhammad Hassan</title>
+    <meta name="description" content="The page you're looking for doesn't exist. Let's get you back on track.">
+    <meta name="robots" content="noindex, follow">
+
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%2305060E'/%3E%3Ctext x='50' y='68' font-family='Arial' font-size='56' font-weight='800' text-anchor='middle' fill='%2300F5FF'%3EM%3C/text%3E%3C/svg%3E">
+
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/responsive.css">
+
+    <style>
+        .error-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .error-page::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 700px;
+            height: 700px;
+            background: radial-gradient(circle, var(--color-primary-glow), transparent 70%);
+            filter: blur(80px);
+            opacity: 0.5;
+            pointer-events: none;
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        .error-content {
+            text-align: center;
+            max-width: 560px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .error-code {
+            font-size: clamp(7rem, 20vw, 14rem);
+            font-weight: 900;
+            line-height: 0.9;
+            letter-spacing: -0.06em;
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 200% auto;
+            animation: gradientShift 6s ease infinite;
+            margin-bottom: 1rem;
+        }
+
+        .error-title {
+            font-size: clamp(1.5rem, 4vw, 2.25rem);
+            color: #fff;
+            margin-bottom: 1rem;
+        }
+
+        .error-desc {
+            color: var(--text-dark-muted);
+            font-size: 1.05rem;
+            line-height: 1.7;
+            margin-bottom: 2.5rem;
+        }
+
+        .error-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 480px) {
+            .error-actions { flex-direction: column; }
+            .error-actions .btn { width: 100%; }
+        }
+    </style>
+</head>
+<body class="theme-dark">
+
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <main id="main-content" class="error-page">
+        <div class="error-content">
+
+            <div class="error-code">404</div>
+
+            <h1 class="error-title">Page Not Found</h1>
+
+            <p class="error-desc">
+                The page you're looking for seems to have disappeared into the void. It might have been moved, deleted, or never existed in the first place.
+            </p>
+
+            <div class="error-actions">
+                <a href="index.html" class="btn btn-primary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>
+                    Back to Home
+                </a>
+                <a href="projects.html" class="btn btn-outline">View Projects</a>
+            </div>
+
+        </div>
+    </main>
+
+</body>
+</html>

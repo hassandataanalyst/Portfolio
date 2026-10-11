@@ -1,0 +1,16 @@
+# ============================================
+# robots.txt — Muhammad Hassan Portfolio
+# ============================================
+
+User-agent: *
+Allow: /
+
+# Block internal/private folders
+Disallow: /backup/
+Disallow: /docs/
+Disallow: /assets/documents/
+Disallow: /admin/
+Disallow: /*.py$
+
+# Sitemap location
+Sitemap: https://yourdomain.com/sitemap.xml
