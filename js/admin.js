@@ -26,6 +26,10 @@
             currentFileSha = fileData.sha;
             currentData = JSON.parse(decodeURIComponent(escape(window.atob(fileData.content))));
 
+            if (!currentData.heroStats) {
+                currentData.heroStats = { cgpa: "3.53", cgpaTotal: "4.00" };
+            }
+
             localStorage.setItem('gh_token', token);
             currentToken = token;
             document.getElementById('loginScreen').style.display = 'none';
@@ -34,6 +38,7 @@
             renderAdminProjects();
             renderAdminCertificates();
             renderAdminEducation();
+            openStatsForm();
         } catch (error) { alert('Login failed: ' + error.message); }
     }
 
@@ -62,6 +67,24 @@
             toast.textContent = '✅ Saved! Live site will update in 1-2 mins.';
             document.body.appendChild(toast); setTimeout(() => toast.remove(), 3000);
         } catch (error) { alert('❌ Error: ' + error.message); }
+    }
+
+    // ==========================================
+    // HERO STATS CRUD (CGPA)
+    // ==========================================
+    window.openStatsForm = function() {
+        if (currentData.heroStats) {
+            document.getElementById('stat-cgpa').value = currentData.heroStats.cgpa || "3.53";
+            document.getElementById('stat-cgpa-total').value = currentData.heroStats.cgpaTotal || "4.00";
+        }
+    }
+
+    window.saveStatsForm = function() {
+        currentData.heroStats = {
+            cgpa: document.getElementById('stat-cgpa').value,
+            cgpaTotal: document.getElementById('stat-cgpa-total').value
+        };
+        saveToGitHub();
     }
 
     // ==========================================
@@ -196,7 +219,7 @@
     }
 
     // ==========================================
-    // EDUCATION CRUD (Waise hi rahega)
+    // EDUCATION CRUD
     // ==========================================
     function renderAdminEducation() {
         const container = document.getElementById('admin-edu-list');

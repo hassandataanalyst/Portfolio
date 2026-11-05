@@ -1,14 +1,14 @@
 (function () {
   'use strict';
 
-  let portfolioData = { projects: [] };
+  let portfolioData = { projects: [], certifications: [], heroStats: { cgpa: "3.53", cgpaTotal: "4.00" } };
 
   document.addEventListener('DOMContentLoaded', async () => {
     try {
       const response = await fetch('data.json');
       portfolioData = await response.json();
       
-      initServiceFinder(); // Yeh abhi hardcoded hai, thik hai
+      initServiceFinder();
       initFeaturedProjects();
       initHeroInteractions();
       initHeroStats();
@@ -21,30 +21,22 @@
   function initServiceFinder() {
     const finderBtns = document.querySelectorAll('.finder-btn');
     const finderPanels = document.querySelectorAll('.finder-panel');
-    if (!finderBtns.length || !finderPanels.length) return;
-
+    if (!finderBtns.length) return;
     finderBtns.forEach(btn => {
       btn.addEventListener('click', () => {
         const targetId = btn.getAttribute('data-target');
         if (!targetId) return;
-
-        finderBtns.forEach(b => {
-          b.classList.remove('active');
-          b.setAttribute('aria-selected', 'false');
-        });
+        finderBtns.forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        btn.setAttribute('aria-selected', 'true');
-
         finderPanels.forEach(p => p.classList.remove('active'));
         const targetPanel = document.getElementById('result-' + targetId);
-        if (targetPanel) {
-          targetPanel.classList.add('active');
-        }
+        if (targetPanel) targetPanel.classList.add('active');
       });
     });
   }
 
   function initFeaturedProjects() {
+    const section = document.getElementById('featured-projects-section');
     const scroll = document.getElementById('home-projects-grid');
     const wrap = document.getElementById('featured-scroll-wrap');
     const prevBtn = document.getElementById('featured-prev');
@@ -53,29 +45,29 @@
 
     if (!scroll || !portfolioData.projects) return;
 
-    let featured = portfolioData.projects.filter(p => p.featured === true);
-    if (featured.length < 3) {
-      featured = portfolioData.projects.slice(0, 6);
+    // HIDE SECTION IF NO PROJECTS
+    if (portfolioData.projects.length === 0) {
+      if (section) section.style.display = 'none';
+      return;
+    } else {
+      if (section) section.style.display = 'block';
     }
 
+    let featured = portfolioData.projects.filter(p => p.featured === true);
+    if (featured.length < 3) featured = portfolioData.projects.slice(0, 6);
+
     if (!featured.length) {
-      scroll.innerHTML = '<p class="text-muted" style="text-align:center; padding: 2rem;">No projects available yet.</p>';
+      if (section) section.style.display = 'none';
       return;
     }
 
     scroll.innerHTML = featured.map((p) => {
       const tools = (p.technologies || []).slice(0, 4);
       const toolsHTML = tools.map(t => `<span>${escapeHTML(t)}</span>`).join('');
-
       return `
-        <a href="projects.html#${escapeHTML(p.slug)}"
-           class="featured-card"
-           aria-label="View project: ${escapeHTML(p.title)}">
+        <a href="projects.html#${escapeHTML(p.slug)}" class="featured-card">
           <div class="proj-img">
-            <img src="${escapeHTML(p.imagePath)}"
-                 alt="${escapeHTML(p.title)}"
-                 loading="lazy"
-                 onerror="this.style.display='none'">
+            <img src="${escapeHTML(p.imagePath)}" alt="${escapeHTML(p.title)}" loading="lazy" onerror="this.style.display='none'">
             <span class="proj-badge">${escapeHTML(p.status || 'Project')}</span>
           </div>
           <div class="proj-content">
@@ -91,7 +83,6 @@
       const maxScroll = scroll.scrollWidth - scroll.clientWidth;
       if (prevBtn) prevBtn.disabled = scroll.scrollLeft <= 4;
       if (nextBtn) nextBtn.disabled = scroll.scrollLeft >= maxScroll - 4;
-
       if (progressBar) {
         const ratio = scroll.clientWidth / scroll.scrollWidth;
         const visibleWidth = Math.max(ratio * 100, 12);
@@ -100,7 +91,6 @@
         progressBar.style.width = visibleWidth + '%';
         progressBar.style.transform = `translateX(${scrollRatio * (100 / visibleWidth) * maxTranslate}%)`;
       }
-
       if (wrap) {
         wrap.classList.toggle('at-start', scroll.scrollLeft <= 4);
         wrap.classList.toggle('at-end', scroll.scrollLeft >= maxScroll - 4);
@@ -118,15 +108,9 @@
     if (nextBtn) nextBtn.addEventListener('click', () => scroll.scrollBy({ left: scrollAmount(), behavior: 'smooth' }));
 
     let isDown = false, startX = 0, scrollStart = 0, moved = false;
-
-    scroll.addEventListener('mousedown', (e) => {
-      isDown = true; moved = false; scroll.style.cursor = 'grabbing';
-      startX = e.pageX; scrollStart = scroll.scrollLeft;
-    });
-
+    scroll.addEventListener('mousedown', (e) => { isDown = true; moved = false; scroll.style.cursor = 'grabbing'; startX = e.pageX; scrollStart = scroll.scrollLeft; });
     scroll.addEventListener('mouseleave', () => { isDown = false; scroll.style.cursor = 'grab'; });
     window.addEventListener('mouseup', () => { isDown = false; scroll.style.cursor = 'grab'; });
-
     scroll.addEventListener('mousemove', (e) => {
       if (!isDown) return;
       e.preventDefault();
@@ -135,10 +119,7 @@
       if (Math.abs(walk) > 5) moved = true;
       scroll.scrollLeft = scrollStart - walk;
     });
-
-    scroll.addEventListener('click', (e) => {
-      if (moved) { e.preventDefault(); e.stopPropagation(); }
-    }, true);
+    scroll.addEventListener('click', (e) => { if (moved) { e.preventDefault(); e.stopPropagation(); } }, true);
 
     let ticking = false;
     scroll.addEventListener('scroll', () => {
@@ -149,13 +130,6 @@
     }, { passive: true });
 
     window.addEventListener('resize', updateArrows);
-    
-    scroll.setAttribute('tabindex', '0');
-    scroll.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowLeft') { e.preventDefault(); scroll.scrollBy({ left: -scrollAmount(), behavior: 'smooth' }); }
-      else if (e.key === 'ArrowRight') { e.preventDefault(); scroll.scrollBy({ left: scrollAmount(), behavior: 'smooth' }); }
-    });
-
     setTimeout(updateArrows, 150);
     window.addEventListener('load', updateArrows);
   }
@@ -167,31 +141,55 @@
       heroImg.addEventListener('mouseenter', () => heroImg.style.animationPlayState = 'paused');
       heroImg.addEventListener('mouseleave', () => heroImg.style.animationPlayState = 'running');
     }
-    const heroVisual = document.querySelector('.hero-visual');
-    if (heroVisual && !heroVisual.querySelector('.hero-particles')) {
-      const particleContainer = document.createElement('div');
-      particleContainer.className = 'hero-particles';
-      particleContainer.style.position = 'absolute';
-      particleContainer.style.inset = '0';
-      particleContainer.style.pointerEvents = 'none';
-      particleContainer.style.zIndex = '0';
-      heroVisual.insertBefore(particleContainer, heroVisual.firstChild);
-    }
   }
 
   function initHeroStats() {
-    const stats = document.querySelectorAll('.hero-stat-value .counter');
-    stats.forEach(el => {
-      if (!el.dataset.target) {
-        const text = el.textContent.trim();
-        const match = text.match(/[\d.]+/);
-        if (match) { el.dataset.target = match[0]; el.textContent = '0'; }
+    const statsElements = document.querySelectorAll('.hero-stat-value');
+    if (!statsElements.length) return;
+
+    const projectsCount = portfolioData.projects ? portfolioData.projects.length : 0;
+    const certsCount = portfolioData.certifications ? portfolioData.certifications.length : 0;
+    const cgpaData = portfolioData.heroStats || { cgpa: "0", cgpaTotal: "4.00" };
+
+    // CGPA
+    if (statsElements[0]) {
+      const cgpaCounter = statsElements[0].querySelector('.counter');
+      if (cgpaCounter) {
+        cgpaCounter.setAttribute('data-target', cgpaData.cgpa);
+        const dec = cgpaData.cgpa.toString().split('.')[1];
+        cgpaCounter.setAttribute('data-decimals', dec ? dec.length : 0);
+        cgpaCounter.textContent = '0';
       }
-    });
+      const cgpaLabel = statsElements[0].parentElement.querySelector('.hero-stat-label');
+      if (cgpaLabel) cgpaLabel.innerHTML = `CGPA / ${cgpaData.cgpaTotal}`;
+    }
+
+    // Projects
+    if (statsElements[1]) {
+      const projCounter = statsElements[1].querySelector('.counter');
+      if (projCounter) {
+        projCounter.setAttribute('data-target', projectsCount);
+        projCounter.setAttribute('data-suffix', projectsCount > 99 ? '+' : '');
+        projCounter.textContent = '0';
+      }
+    }
+
+    // Certifications
+    if (statsElements[2]) {
+      const certCounter = statsElements[2].querySelector('.counter');
+      if (certCounter) {
+        certCounter.setAttribute('data-target', certsCount);
+        certCounter.textContent = '0';
+      }
+    }
+
+    if (window.PortfolioUtils && window.PortfolioUtils.initCounters) {
+      window.PortfolioUtils.initCounters(); 
+    }
   }
 
   function escapeHTML(str) {
-    if (str === null || str === undefined) return '';
+    if (!str) return '';
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
   }
 

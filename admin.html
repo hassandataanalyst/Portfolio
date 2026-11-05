@@ -60,6 +60,7 @@
                 <button class="active" onclick="switchTab('projects', this)">📁 Projects</button>
                 <button onclick="switchTab('certificates', this)">📜 Certificates</button>
                 <button onclick="switchTab('education', this)">🎓 Education</button>
+                <button onclick="switchTab('stats', this)">📊 Hero Stats</button> <!-- NEW TAB -->
             </ul>
             <div style="margin-top: auto; padding-top: 2rem;">
                 <button class="btn btn-outline" style="width: 100%; font-size: 0.8rem;" onclick="logout()">Logout</button>
@@ -93,6 +94,25 @@
                 </div>
                 <div class="admin-form"><h3>Education Timeline</h3><div id="admin-edu-list"></div></div>
             </div>
+
+            <!-- NEW: STATS TAB -->
+            <div id="tab-stats" class="tab-content">
+                <div class="admin-header">
+                    <h1>Manage Hero Stats</h1>
+                </div>
+                <div class="admin-form">
+                    <h3>Homepage CGPA</h3>
+                    <div class="form-group">
+                        <label>CGPA Value (e.g. 3.53)</label>
+                        <input type="text" id="stat-cgpa" placeholder="3.53">
+                    </div>
+                    <div class="form-group">
+                        <label>Total CGPA (e.g. 4.00)</label>
+                        <input type="text" id="stat-cgpa-total" placeholder="4.00">
+                    </div>
+                    <button class="btn btn-primary" onclick="saveStatsForm()" style="margin-top: 1rem;">Save Stats</button>
+                </div>
+            </div>
         </main>
     </div>
 
@@ -108,9 +128,7 @@
             <div class="form-group"><label>Technologies (comma separated)</label><input type="text" id="proj-tech"></div>
             <div class="form-group"><label>Image URL</label><input type="text" id="proj-img"></div>
             <div class="form-group"><label>Featured? (true/false)</label><input type="text" id="proj-featured"></div>
-            <div id="dynamic-sections-container">
-                <!-- Dynamic Sections will be added here -->
-            </div>
+            <div id="dynamic-sections-container"></div>
             <button class="btn btn-outline" style="margin-bottom: 1.5rem;" onclick="addProjectSection()">+ Add Section (Heading & Desc)</button>
             <div style="display: flex; gap: 1rem;">
                 <button class="btn btn-primary" style="flex: 1;" onclick="saveProjectForm()">Save Project</button>
