@@ -1,7 +1,6 @@
 (function () {
     'use strict';
 
-    // --- Configuration ---
     const GITHUB_USER = 'hassandataanalyst';
     const GITHUB_REPO = 'Portfolio';
     const FILE_PATH = 'data.json';
@@ -10,12 +9,10 @@
     let currentFileSha = null;
     let currentToken = null;
 
-    // --- DOM Elements ---
     const loginScreen = document.getElementById('loginScreen');
     const dashboard = document.getElementById('dashboard');
     const tokenInput = document.getElementById('tokenInput');
-    
-    // --- INIT ---
+
     document.addEventListener('DOMContentLoaded', () => {
         const savedToken = localStorage.getItem('gh_token');
         if (savedToken) {
@@ -25,7 +22,6 @@
         }
     });
 
-    // --- LOGIN & FETCH DATA ---
     window.login = async function() {
         const token = tokenInput.value.trim();
         if (!token || !token.startsWith('ghp_')) {
@@ -39,7 +35,6 @@
         btn.disabled = true;
 
         try {
-            // Fetch current data.json from GitHub to get SHA and content
             const res = await fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${FILE_PATH}`, {
                 headers: { 'Authorization': `token ${token}` }
             });
@@ -48,16 +43,12 @@
             
             const fileData = await res.json();
             currentFileSha = fileData.sha;
-            
-            // Decode base64 content
             const content = decodeURIComponent(escape(window.atob(fileData.content)));
             currentData = JSON.parse(content);
 
-            // Save token
             localStorage.setItem('gh_token', token);
             currentToken = token;
 
-            // Show Dashboard
             loginScreen.style.display = 'none';
             dashboard.style.display = 'flex';
             
@@ -79,7 +70,6 @@
         location.reload();
     }
 
-    // --- TABS LOGIC ---
     window.switchTab = function(tabId, btn) {
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.admin-nav button').forEach(el => el.classList.remove('active'));
@@ -87,37 +77,32 @@
         btn.classList.add('active');
     }
 
-    // --- SAVE TO GITHUB API ---
     async function saveToGitHub() {
         const msg = prompt("Enter a commit message for this change:", "Update portfolio data via Admin Panel");
-        if (msg === null) return; // User cancelled
+        if (msg === null) return;
 
         try {
             const contentEncoded = window.btoa(unescape(encodeURIComponent(JSON.stringify(currentData, null, 2))));
-            
             const res = await fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${FILE_PATH}`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `token ${currentToken}`,
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    message: msg,
-                    content: contentEncoded,
-                    sha: currentFileSha
-                })
+                body: JSON.stringify({ message: msg, content: contentEncoded, sha: currentFileSha })
             });
 
-            if (!res.ok) {
-                if(res.status === 401) throw new Error('Token is invalid or expired. Please check.');
-                if(res.status === 404) throw new Error('Repository not found. Check username/repo name.');
-                throw new Error('GitHub API Error: ' + res.statusText);
-            }
-            
+            if (!res.ok) throw new Error('Failed to save to GitHub');
             const data = await res.json();
-            currentFileSha = data.content.sha; // Update SHA for next save
-            alert('✅ Saved successfully! Your live website will update in 1-2 minutes.');
+            currentFileSha = data.content.sha;
             
+            // Naya Notification System
+            const toast = document.createElement('div');
+            toast.style.cssText = 'position:fixed; bottom:20px; right:20px; background:#10b981; color:#fff; padding:1rem; border-radius:8px; z-index:9999; font-weight:bold;';
+            toast.textContent = '✅ Saved to GitHub! Site will update in 1-2 mins.';
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+
         } catch (error) {
             console.error(error);
             alert('❌ Error saving: ' + error.message);
@@ -125,19 +110,18 @@
     }
 
     // ==========================================
-    // 1. PROJECTS CRUD
+    // PROJECTS CRUD
     // ==========================================
     function renderAdminProjects() {
         const container = document.getElementById('admin-projects-list');
         if (!container) return;
-
         container.innerHTML = currentData.projects.map((p, index) => `
             <div style="background: rgba(255,255,255,0.05); border: 1px solid var(--bg-dark-border); padding: 1rem; border-radius: 8px; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
                 <div>
-                    <h4 style="color: #fff;">${p.title}</h4>
+                    <h4 style="color: #fff; margin-bottom: 0.2rem;">${p.title}</h4>
                     <span style="font-size: 0.8rem; color: var(--neon-cyan);">${p.category} | Featured: ${p.featured ? 'Yes' : 'No'}</span>
                 </div>
-                <div>
+                <div style="display: flex; gap: 0.5rem;">
                     <button class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="editProject(${index})">Edit</button>
                     <button class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; color: #ff4d4d; border-color: #ff4d4d;" onclick="deleteProject(${index})">Delete</button>
                 </div>
@@ -165,20 +149,20 @@
     }
 
     // ==========================================
-    // 2. CERTIFICATES CRUD
+    // CERTIFICATES CRUD
     // ==========================================
     function renderAdminCertificates() {
         const container = document.getElementById('admin-certs-list');
         if (!container) return;
-
         container.innerHTML = currentData.certifications.map((c, index) => `
             <div style="background: rgba(255,255,255,0.05); border: 1px solid var(--bg-dark-border); padding: 1rem; border-radius: 8px; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
                 <div>
-                    <h4 style="color: #fff;">${c.title}</h4>
-                    <span style="font-size: 0.8rem; color: var(--neon-cyan);">${c.issuer}</span>
+                    <h4 style="color: #fff; margin-bottom: 0.2rem;">${c.title}</h4>
+                    <span style="font-size: 0.85rem; color: var(--neon-cyan);">${c.issuer}</span>
+                    <span style="font-size: 0.8rem; color: var(--text-dark-muted); display: block;">${c.date}</span>
                 </div>
-                <div>
-                    <button class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="editCert(${index})">Edit</button>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="openCertForm(${index})">Edit</button>
                     <button class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; color: #ff4d4d; border-color: #ff4d4d;" onclick="deleteCert(${index})">Delete</button>
                 </div>
             </div>
@@ -186,38 +170,64 @@
     }
 
     window.deleteCert = function(index) {
-        if (confirm('Delete this certificate?')) {
+        if (confirm('Are you sure you want to delete this certificate?')) {
             currentData.certifications.splice(index, 1);
             renderAdminCertificates();
             saveToGitHub();
         }
     }
 
-    window.editCert = function(index) {
-        const c = currentData.certifications[index];
-        const newTitle = prompt("Certificate Title:", c.title);
-        if (newTitle !== null) {
-            c.title = newTitle;
-            renderAdminCertificates();
-            saveToGitHub();
+    window.openCertForm = function(index = -1) {
+        const isEdit = index !== -1;
+        const cert = isEdit ? currentData.certifications[index] : { title: '', issuer: '', date: '', file: '', verifyUrl: '' };
+        
+        document.getElementById('cert-form-title').textContent = isEdit ? 'Edit Certificate' : 'Add New Certificate';
+        document.getElementById('cert-index').value = index;
+        document.getElementById('cert-title').value = cert.title;
+        document.getElementById('cert-issuer').value = cert.issuer;
+        document.getElementById('cert-date').value = cert.date;
+        document.getElementById('cert-file').value = cert.file;
+        document.getElementById('cert-verify').value = cert.verifyUrl || '';
+        
+        document.getElementById('cert-form-modal').style.display = 'flex';
+    }
+
+    window.saveCertForm = function() {
+        const index = parseInt(document.getElementById('cert-index').value);
+        const newCert = {
+            title: document.getElementById('cert-title').value,
+            issuer: document.getElementById('cert-issuer').value,
+            date: document.getElementById('cert-date').value,
+            file: document.getElementById('cert-file').value,
+            verifyUrl: document.getElementById('cert-verify').value
+        };
+
+        if (index === -1) {
+            currentData.certifications.push(newCert);
+        } else {
+            currentData.certifications[index] = newCert;
         }
+
+        document.getElementById('cert-form-modal').style.display = 'none';
+        renderAdminCertificates();
+        saveToGitHub();
     }
 
     // ==========================================
-    // 3. EDUCATION CRUD
+    // EDUCATION CRUD
     // ==========================================
     function renderAdminEducation() {
         const container = document.getElementById('admin-edu-list');
         if (!container) return;
-
         container.innerHTML = currentData.education.map((e, index) => `
             <div style="background: rgba(255,255,255,0.05); border: 1px solid var(--bg-dark-border); padding: 1rem; border-radius: 8px; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
                 <div>
-                    <h4 style="color: #fff;">${e.degree}</h4>
-                    <span style="font-size: 0.8rem; color: var(--neon-cyan);">${e.institution}</span>
+                    <h4 style="color: #fff; margin-bottom: 0.2rem;">${e.degree}</h4>
+                    <span style="font-size: 0.85rem; color: var(--neon-cyan);">${e.institution}</span>
+                    <span style="font-size: 0.8rem; color: var(--text-dark-muted); display: block;">${e.period} | ${e.detail}</span>
                 </div>
-                <div>
-                    <button class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="editEdu(${index})">Edit</button>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="openEduForm(${index})">Edit</button>
                     <button class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; color: #ff4d4d; border-color: #ff4d4d;" onclick="deleteEdu(${index})">Delete</button>
                 </div>
             </div>
@@ -225,21 +235,45 @@
     }
 
     window.deleteEdu = function(index) {
-        if (confirm('Delete this education entry?')) {
+        if (confirm('Are you sure you want to delete this education entry?')) {
             currentData.education.splice(index, 1);
             renderAdminEducation();
             saveToGitHub();
         }
     }
 
-    window.editEdu = function(index) {
-        const e = currentData.education[index];
-        const newDegree = prompt("Degree/Level:", e.degree);
-        if (newDegree !== null) {
-            e.degree = newDegree;
-            renderAdminEducation();
-            saveToGitHub();
+    window.openEduForm = function(index = -1) {
+        const isEdit = index !== -1;
+        const edu = isEdit ? currentData.education[index] : { degree: '', institution: '', period: '', detail: '' };
+        
+        document.getElementById('edu-form-title').textContent = isEdit ? 'Edit Education' : 'Add New Education';
+        document.getElementById('edu-index').value = index;
+        document.getElementById('edu-degree').value = edu.degree;
+        document.getElementById('edu-institution').value = edu.institution;
+        document.getElementById('edu-period').value = edu.period;
+        document.getElementById('edu-detail').value = edu.detail;
+        
+        document.getElementById('edu-form-modal').style.display = 'flex';
+    }
+
+    window.saveEduForm = function() {
+        const index = parseInt(document.getElementById('edu-index').value);
+        const newEdu = {
+            degree: document.getElementById('edu-degree').value,
+            institution: document.getElementById('edu-institution').value,
+            period: document.getElementById('edu-period').value,
+            detail: document.getElementById('edu-detail').value
+        };
+
+        if (index === -1) {
+            currentData.education.push(newEdu);
+        } else {
+            currentData.education[index] = newEdu;
         }
+
+        document.getElementById('edu-form-modal').style.display = 'none';
+        renderAdminEducation();
+        saveToGitHub();
     }
 
 })();

@@ -10,10 +10,8 @@
     <link rel="stylesheet" href="css/styles.css">
     
     <style>
-        /* Admin Panel Specific Styles */
         .admin-body { display: flex; min-height: 100vh; background-color: var(--bg-dark); }
         
-        /* Login Screen */
         .login-screen {
             position: fixed; inset: 0; background: rgba(5, 6, 14, 0.95);
             display: flex; align-items: center; justify-content: center; z-index: 9999;
@@ -32,7 +30,6 @@
         }
         .login-box input:focus { border-color: var(--neon-cyan); outline: none; }
 
-        /* Sidebar */
         .admin-sidebar {
             width: 260px; background: var(--bg-dark-surface); border-right: 1px solid var(--bg-dark-border);
             padding: 2rem 1rem; display: flex; flex-direction: column;
@@ -48,7 +45,6 @@
             background: rgba(0, 245, 255, 0.1); color: var(--neon-cyan);
         }
 
-        /* Main Content */
         .admin-main { flex: 1; padding: 2rem; overflow-y: auto; }
         .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
         .admin-header h1 { color: #fff; font-size: 1.8rem; }
@@ -56,33 +52,36 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: fadeSlideUp 0.3s var(--ease-out); }
 
-        /* Form Styles */
         .admin-form { background: var(--bg-dark-surface); padding: 2rem; border-radius: var(--radius-lg); border: 1px solid var(--bg-dark-border); }
         .admin-form h3 { color: #fff; margin-bottom: 1.5rem; border-bottom: 1px solid var(--bg-dark-border); padding-bottom: 0.5rem; }
+        
+        .form-group { margin-bottom: 1.2rem; }
+        .form-group label { display: block; color: var(--neon-cyan); font-size: 0.85rem; margin-bottom: 0.5rem; font-family: var(--font-mono); }
+        .form-group input, .form-group textarea {
+            width: 100%; padding: 0.8rem; background: rgba(0,0,0,0.2);
+            border: 1px solid var(--bg-dark-border); border-radius: var(--radius-sm);
+            color: #fff; font-family: inherit;
+        }
+        .form-group input:focus, .form-group textarea:focus { border-color: var(--neon-cyan); outline: none; }
     </style>
 </head>
 <body class="theme-dark admin-body">
 
     <!-- LOGIN SCREEN -->
     <div class="login-screen" id="loginScreen">
-                <div class="login-box">
+        <div class="login-box">
             <h2>Admin Access</h2>
             <p>Enter your GitHub Personal Access Token to manage content.</p>
-            
             <div style="position: relative; margin-bottom: 1.5rem;">
                 <input type="password" id="tokenInput" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" style="margin-bottom: 0; padding-right: 45px;">
-                <button type="button" onclick="togglePassword()" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--neon-cyan); cursor: pointer;">
-                    👁️
-                </button>
+                <button type="button" onclick="togglePassword()" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--neon-cyan); cursor: pointer;">👁️</button>
             </div>
-            
             <button class="btn btn-primary" style="width: 100%;" onclick="login()">Login to Dashboard</button>
         </div>
     </div>
 
-    <!-- DASHBOARD (Hidden initially) -->
+    <!-- DASHBOARD -->
     <div id="dashboard" style="display: none; width: 100%; display: flex;">
-        
         <!-- Sidebar -->
         <aside class="admin-sidebar">
             <h2>M. Hassan Admin</h2>
@@ -103,7 +102,7 @@
             <div id="tab-projects" class="tab-content active">
                 <div class="admin-header">
                     <h1>Manage Projects</h1>
-                    <button class="btn btn-primary" onclick="alert('Next update me add hoga!')">+ Add New Project</button>
+                    <button class="btn btn-primary" onclick="alert('Projects ka form agle step me aayega!')">+ Add New Project</button>
                 </div>
                 <div class="admin-form">
                     <h3>Project List</h3>
@@ -115,7 +114,7 @@
             <div id="tab-certificates" class="tab-content">
                 <div class="admin-header">
                     <h1>Manage Certificates</h1>
-                    <button class="btn btn-primary" onclick="alert('Next update me add hoga!')">+ Add Certificate</button>
+                    <button class="btn btn-primary" onclick="openCertForm()">+ Add Certificate</button>
                 </div>
                 <div class="admin-form">
                     <h3>Certificate List</h3>
@@ -127,7 +126,7 @@
             <div id="tab-education" class="tab-content">
                 <div class="admin-header">
                     <h1>Manage Education</h1>
-                    <button class="btn btn-primary" onclick="alert('Next update me add hoga!')">+ Add Education</button>
+                    <button class="btn btn-primary" onclick="openEduForm()">+ Add Education</button>
                 </div>
                 <div class="admin-form">
                     <h3>Education Timeline</h3>
@@ -137,18 +136,46 @@
 
         </main>
     </div>
-        <script>
+
+    <!-- EDUCATION FORM MODAL -->
+    <div id="edu-form-modal" style="display: none; position: fixed; inset: 0; background: rgba(5,6,14,0.8); z-index: 9999; align-items: center; justify-content: center;">
+        <div style="background: var(--bg-dark-surface); padding: 2rem; border-radius: var(--radius-lg); border: 1px solid var(--bg-dark-border); width: 90%; max-width: 500px;">
+            <h3 id="edu-form-title" style="color: #fff; margin-bottom: 1.5rem;">Add New Education</h3>
+            <input type="hidden" id="edu-index" value="-1">
+            <div class="form-group"><label>Degree / Level</label><input type="text" id="edu-degree" placeholder="e.g. Bachelor of Science"></div>
+            <div class="form-group"><label>Institution</label><input type="text" id="edu-institution" placeholder="e.g. Emerson University"></div>
+            <div class="form-group"><label>Period (Years)</label><input type="text" id="edu-period" placeholder="e.g. 2023 - Present"></div>
+            <div class="form-group"><label>Detail (Marks / CGPA)</label><input type="text" id="edu-detail" placeholder="e.g. CGPA: 3.53 / 4.00"></div>
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <button class="btn btn-primary" style="flex: 1;" onclick="saveEduForm()">Save Education</button>
+                <button class="btn btn-outline" style="flex: 1;" onclick="document.getElementById('edu-form-modal').style.display='none'">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CERTIFICATE FORM MODAL -->
+    <div id="cert-form-modal" style="display: none; position: fixed; inset: 0; background: rgba(5,6,14,0.8); z-index: 9999; align-items: center; justify-content: center;">
+        <div style="background: var(--bg-dark-surface); padding: 2rem; border-radius: var(--radius-lg); border: 1px solid var(--bg-dark-border); width: 90%; max-width: 500px;">
+            <h3 id="cert-form-title" style="color: #fff; margin-bottom: 1.5rem;">Add New Certificate</h3>
+            <input type="hidden" id="cert-index" value="-1">
+            <div class="form-group"><label>Certificate Title</label><input type="text" id="cert-title" placeholder="e.g. Hello, Python!"></div>
+            <div class="form-group"><label>Issuer (Organization)</label><input type="text" id="cert-issuer" placeholder="e.g. Google via Coursera"></div>
+            <div class="form-group"><label>Date</label><input type="text" id="cert-date" placeholder="e.g. 9 Sep, 2026"></div>
+            <div class="form-group"><label>PDF File Path</label><input type="text" id="cert-file" placeholder="e.g. assets/documents/certificates/file.pdf"></div>
+            <div class="form-group"><label>Verify URL (Optional)</label><input type="text" id="cert-verify" placeholder="https://..."></div>
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <button class="btn btn-primary" style="flex: 1;" onclick="saveCertForm()">Save Certificate</button>
+                <button class="btn btn-outline" style="flex: 1;" onclick="document.getElementById('cert-form-modal').style.display='none'">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
         function togglePassword() {
             const input = document.getElementById('tokenInput');
-            if (input.type === "password") {
-                input.type = "text";
-            } else {
-                input.type = "password";
-            }
+            input.type = input.type === "password" ? "text" : "password";
         }
     </script>
-    <script src="js/admin.js"></script>
-
     <script src="js/admin.js"></script>
 </body>
 </html>
