@@ -239,22 +239,7 @@
       ]
     }
   ],
-  "certifications": [
-    {
-      "title": "Introducing Data Analytics",
-      "issuer": "Google via Coursera",
-      "date": "9 Sep, 2026",
-      "file": "assets/documents/certificates/Data Analyst Certificate Coursera.pdf",
-      "verifyUrl": "https://coursera.org/verify/OE8VNXVVOA6N"
-    },
-    {
-      "title": "Hello, Python!",
-      "issuer": "Google via Coursera",
-      "date": "9 Sep, 2026",
-      "file": "assets/documents/certificates/Python Certificate Coursera.pdf",
-      "verifyUrl": "https://coursera.org/verify/HYD5973X92MA"
-    }
-  ],
+  "certifications": [],
   "education": [
     {
       "degree": "Bachelor of Science in Computer Science",
